@@ -1,5 +1,6 @@
 package com.Digis01.FArceProgramacionNCapas.RestController;
 
+import com.Digis01.FArceProgramacionNCapas.DAO.RolDAOImplementation;
 import com.Digis01.FArceProgramacionNCapas.DAO.UsuarioDAOImplementation;
 import com.Digis01.FArceProgramacionNCapas.JPA.Result;
 import com.Digis01.FArceProgramacionNCapas.JPA.Usuario;
@@ -24,6 +25,9 @@ public class UsuarioRestController {
     @Autowired
     private UsuarioDAOImplementation usuarioDAOImplementation;
 
+    @Autowired
+    private RolDAOImplementation rolDAOImplementation;
+
     @GetMapping("saludo")
     public String Saludo() {
         return "Hola Mundo";
@@ -32,6 +36,20 @@ public class UsuarioRestController {
     @GetMapping()
     public ResponseEntity GetAll() {
         Result result = usuarioDAOImplementation.GetAllJPA();
+        if (result.correct) {
+            if (result.objects.isEmpty()) {
+                return ResponseEntity.status(204).body(null);
+            } else {
+                return ResponseEntity.ok(result);
+            }
+        } else {
+            return ResponseEntity.status(404).body(null);
+        }
+    }
+
+    @GetMapping("/rolapi")
+    public ResponseEntity GetAllRoles() {
+        Result result = rolDAOImplementation.GetAllJPA();
         if (result.correct) {
             if (result.objects.isEmpty()) {
                 return ResponseEntity.status(204).body(null);
