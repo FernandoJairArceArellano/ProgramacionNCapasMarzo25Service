@@ -1,5 +1,6 @@
 package com.Digis01.FArceProgramacionNCapas.RestController;
 
+import com.Digis01.FArceProgramacionNCapas.DAO.PaisDAOImplementation;
 import com.Digis01.FArceProgramacionNCapas.DAO.RolDAOImplementation;
 import com.Digis01.FArceProgramacionNCapas.DAO.UsuarioDAOImplementation;
 import com.Digis01.FArceProgramacionNCapas.JPA.Result;
@@ -27,6 +28,9 @@ public class UsuarioRestController {
 
     @Autowired
     private RolDAOImplementation rolDAOImplementation;
+
+    @Autowired
+    private PaisDAOImplementation paisDAOImplementation;
 
     @GetMapping("saludo")
     public String Saludo() {
@@ -114,6 +118,20 @@ public class UsuarioRestController {
             return ResponseEntity.ok().body("Usuario eliminado correctamente.");
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(result.errorMessage);
+        }
+    }
+
+    @GetMapping("/Pais")
+    public ResponseEntity getPais() {
+        Result result = paisDAOImplementation.GetAllJPA();
+        if (result.correct) {
+            if (result.objects.isEmpty()) {
+                return ResponseEntity.status(204).body(null);
+            } else {
+                return ResponseEntity.ok(result);
+            }
+        } else {
+            return ResponseEntity.status(404).body(null);
         }
     }
 

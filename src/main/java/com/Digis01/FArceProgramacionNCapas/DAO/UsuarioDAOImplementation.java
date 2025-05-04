@@ -48,13 +48,14 @@ public class UsuarioDAOImplementation implements IUsuarioDAO {
             for (Usuario usuario : usuarios) {
                 UsuarioDireccion ud = new UsuarioDireccion();
                 ud.Usuario = usuario;
-
-                List<Direccion> direcciones = entityManager
+                ud.Direcciones = usuario.getDirecciones();
+                
+                /*List<Direccion> direcciones = entityManager
                         .createQuery("FROM Direccion WHERE Usuario.IdUsuario = :id", Direccion.class)
                         .setParameter("id", usuario.getIdUsuario())
                         .getResultList();
+                ud.Direcciones = direcciones;*/
 
-                ud.Direcciones = direcciones;
                 listaUsuarioDireccion.add(ud);
             }
 

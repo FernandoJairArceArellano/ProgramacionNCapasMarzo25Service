@@ -26,13 +26,13 @@ public class Direccion {
     @Column(name = "numeroexterior")
     private String NumeroExterior;
 
+    @ManyToOne
     @JoinColumn(name = "idcolonia")
-    @ManyToOne
     @JsonIgnore
-    public Colonia Colonia; // Propiedad de navegacion
+    public Colonia Colonia;
 
-    @JoinColumn(name = "idusuario")
     @ManyToOne
+    @JoinColumn(name = "idusuario")
     @JsonIgnore
     public Usuario Usuario;
 
