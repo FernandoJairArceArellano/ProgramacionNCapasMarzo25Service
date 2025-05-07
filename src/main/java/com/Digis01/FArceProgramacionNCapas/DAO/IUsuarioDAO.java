@@ -13,6 +13,8 @@ public interface IUsuarioDAO {
     Result AddJPA(UsuarioDireccion usuarioDireccion);
 
     Result GetByIdJPA(int IdUsuario);
+    
+    Result GetUsuarioById(int IdUsuario);
 
     Result UpdateJPA(Usuario usuario);
 

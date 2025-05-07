@@ -9,20 +9,23 @@ import com.Digis01.FArceProgramacionNCapas.JPA.ResultFile;
 import com.Digis01.FArceProgramacionNCapas.JPA.Rol;
 import com.Digis01.FArceProgramacionNCapas.JPA.Usuario;
 import com.Digis01.FArceProgramacionNCapas.JPA.UsuarioDireccion;
+import jakarta.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.sql.Array;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import org.apache.poi.ss.usermodel.DateUtil;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -67,6 +70,18 @@ public class UsuarioRestController {
     @GetMapping("getById/{id}")
     public ResponseEntity getById(@PathVariable("id") int idUsuario) {
         Result result = usuarioDAOImplementation.GetByIdJPA(idUsuario);
+        //Result result = usuarioDAOImplementation.GetUsuarioById(idUsuario);
+        if (result.correct) {
+            return ResponseEntity.ok(result);
+        } else {
+            return ResponseEntity.status(404).body(null);
+        }
+    }
+    
+    @GetMapping("getUsuarioById/{id}")
+    public ResponseEntity getUsuarioById(@PathVariable("id") int idUsuario) {
+        //Result result = usuarioDAOImplementation.GetByIdJPA(idUsuario);
+        Result result = usuarioDAOImplementation.GetUsuarioById(idUsuario);
         if (result.correct) {
             return ResponseEntity.ok(result);
         } else {
@@ -96,6 +111,17 @@ public class UsuarioRestController {
         }
     }
 
+    @PutMapping("direccionUpdate/{IdDireccion}")
+    public ResponseEntity<Result> updateDireccion(@RequestBody UsuarioDireccion usuarioDireccion){
+        Result result = direccionDAOImplementation.UpdateByIdJPA(usuarioDireccion);
+        
+        if (result.correct){
+            return ResponseEntity.ok(result);
+        } else{
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(result);
+        }
+    }
+    
     @DeleteMapping("deletedireccion/{IdDireccion}")
     public ResponseEntity deleteDireccionById(@PathVariable int IdDireccion) {
         Result result = direccionDAOImplementation.DeleteDireccionJPA(IdDireccion);
@@ -154,8 +180,8 @@ public class UsuarioRestController {
     }
 
     @PostMapping("/cargaMasiva")
-    public ResponseEntity CargaMasiva(@RequestParam MultipartFile archivo) {
-
+    public ResponseEntity CargaMasiva(@RequestParam("archivo") MultipartFile archivo) {
+        Result result = new Result();
         if (!archivo.isEmpty() || archivo != null) {
 
             try {
@@ -165,7 +191,7 @@ public class UsuarioRestController {
                 String path = "src/main/resources/static/archivos"; //Path relativo dentro del proyecto
                 String fecha = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmSS"));
                 String absolutePath = root + "/" + path + "/" + fecha + archivo.getOriginalFilename();
-
+                archivo.transferTo(new File(absolutePath));
                 //Leer el archivo
                 List<UsuarioDireccion> listaUsuarios = new ArrayList();
                 if (tipoArchivo.equals("txt")) {
@@ -179,10 +205,18 @@ public class UsuarioRestController {
 
                 if (listaErrores.isEmpty()) {
                     //Proceso mi archivo
-                    archivo.transferTo(new File(absolutePath));
-                    return ResponseEntity.ok(listaErrores); //ResultFile o Result?
+                    result.correct = true;
+                    result.object = absolutePath;
+                    return ResponseEntity.ok(result); //ResultFile o Result?
                 } else {
-                    return ResponseEntity.noContent().build();
+                    result.correct = false;
+                    result.objects = new ArrayList();
+
+                    for (ResultFile error : listaErrores) {
+                        result.objects.add(error);
+                    }
+
+                    return ResponseEntity.status(400).body(result);
                 }
 
             } catch (Exception ex) {
@@ -199,9 +233,9 @@ public class UsuarioRestController {
         //Logica para leer el archivo
         List<UsuarioDireccion> listaUsuarios = new ArrayList<>();
 
-        try (FileReader fileReader = new FileReader(archivo); BufferedReader br = new BufferedReader(fileReader);) {
+        try (FileReader fileReader = new FileReader(archivo); BufferedReader bufferedReader = new BufferedReader(fileReader);) {
             String linea;
-            while ((linea = br.readLine()) != null) {
+            while ((linea = bufferedReader.readLine()) != null) {
                 String[] campos = linea.split("\\|");
 
                 // Validación rápida del número de campos esperados
@@ -269,11 +303,33 @@ public class UsuarioRestController {
                     usuarioDireccion.Usuario.setNombre(row.getCell(0).toString());
                     usuarioDireccion.Usuario.setApellidoPaterno(row.getCell(1).toString());
                     usuarioDireccion.Usuario.setApellidoMaterno(row.getCell(2).toString());
-                    usuarioDireccion.Usuario.setEmail(row.getCell(3).toString());
-                    usuarioDireccion.Usuario.Rol = new Rol();
-                    usuarioDireccion.Usuario.Rol.setIdRol(Integer.parseInt(row.getCell(4).toString()));
-                    //usuarioDireccion.Usuario.setStatus(row.getCell(3) != null ? (int) row.getCell(3).getNumericCellValue() : 0 );
+                    usuarioDireccion.Usuario.setImagen(null);
 
+                    if (DateUtil.isCellDateFormatted(row.getCell(4))) {
+                        usuarioDireccion.Usuario.setFNacimiento(row.getCell(4).getDateCellValue());
+                    } else {
+                        double fechaTexto = row.getCell(4).getNumericCellValue();
+                        Date formato = DateUtil.getJavaDate(fechaTexto);
+                        usuarioDireccion.Usuario.setFNacimiento(formato);
+                    }
+
+                    usuarioDireccion.Usuario.setNCelular(row.getCell(5).toString());
+
+                    /*usuarioDireccion.Usuario.Rol = new Rol();
+                    usuarioDireccion.Usuario.Rol.setIdRol(Integer.parseInt(row.getCell(6).toString()));*/
+                    usuarioDireccion.Usuario.setCURP(row.getCell(7).toString());
+                    usuarioDireccion.Usuario.setUsername(row.getCell(8).toString());
+                    usuarioDireccion.Usuario.setEmail(row.getCell(9).toString());
+                    usuarioDireccion.Usuario.setPassword(row.getCell(10).toString());
+                    usuarioDireccion.Usuario.setSexo(row.getCell(11).toString().charAt(0));
+                    usuarioDireccion.Usuario.setTelefono(row.getCell(12).toString());
+                    usuarioDireccion.Direccion.setCalle(row.getCell(13).toString());
+                    usuarioDireccion.Direccion.setNumeroExterior(row.getCell(14).toString());
+                    usuarioDireccion.Direccion.setNumeroInterior(row.getCell(15).toString());
+                    usuarioDireccion.Direccion.Colonia = new Colonia();
+                    usuarioDireccion.Direccion.Colonia.setIdColonia(Integer.parseInt(row.getCell(16).toString()));
+                    usuarioDireccion.Usuario.setStatus(Integer.parseInt(row.getCell(17).toString()));
+                    listaUsuarios.add(usuarioDireccion);
                 }
             }
         } catch (Exception ex) {
@@ -293,20 +349,105 @@ public class UsuarioRestController {
         } else {
             int fila = 1;
             for (UsuarioDireccion usuarioDireccion : listaUsuarios) {
-                if (usuarioDireccion.Usuario.getNombre() == null || usuarioDireccion.Usuario.getNombre().equals("")) {
-                    listaErrores.add(new ResultFile(fila, usuarioDireccion.Usuario.getNombre(), "El nombre es un campo oligatorio"));
+                String nombre = usuarioDireccion.Usuario.getNombre();
+                String apellidoPaterno = usuarioDireccion.Usuario.getApellidoPaterno();
+                String apellidoMaterno = usuarioDireccion.Usuario.getApellidoMaterno();
+                Date fNacimiento = usuarioDireccion.Usuario.getFNacimiento();
+                String nCelular = usuarioDireccion.Usuario.getNCelular();
+                int idRol = usuarioDireccion.Usuario.Rol.getIdRol();
+                String curp = usuarioDireccion.Usuario.getCURP();
+                String userName = usuarioDireccion.Usuario.getUsername();
+                String email = usuarioDireccion.Usuario.getEmail();
+                String password = usuarioDireccion.Usuario.getPassword();
+                char sexo = usuarioDireccion.Usuario.getSexo();
+                String telefono = usuarioDireccion.Usuario.getTelefono();
+                int status = usuarioDireccion.Usuario.getStatus();
+                //String imagen = usuarioDireccion.Usuario.getImagen();
+
+                if (nombre == null || nombre.trim().isEmpty()) {
+                    listaErrores.add(new ResultFile(fila, nombre, "El nombre es obligatorio"));
                 }
 
-                if (usuarioDireccion.Usuario.getApellidoPaterno() == null || usuarioDireccion.Usuario.getApellidoPaterno().equals("")) {
-                    listaErrores.add(new ResultFile(fila, usuarioDireccion.Usuario.getApellidoPaterno(), "El Apellido Paterno es un campo oligatorio"));
+                if (apellidoPaterno == null || apellidoPaterno.trim().isEmpty()) {
+                    listaErrores.add(new ResultFile(fila, apellidoPaterno, "El apellido paterno es obligatorio"));
                 }
 
-                if (usuarioDireccion.Usuario.getUsername() == null || usuarioDireccion.Usuario.getUsername().equals("")) {
-                    listaErrores.add(new ResultFile(fila, usuarioDireccion.Usuario.getApellidoPaterno(), "El Username es un campo oligatorio"));
+                if (apellidoMaterno == null || apellidoMaterno.trim().isEmpty()) {
+                    listaErrores.add(new ResultFile(fila, apellidoMaterno, "El apellido materno es obligatorio"));
                 }
+
+                if (fNacimiento == null) {
+                    listaErrores.add(new ResultFile(fila, "", "La fecha de nacimiento es obligatoria"));
+                }
+
+                if (nCelular == null || nCelular.trim().isEmpty()) {
+                    listaErrores.add(new ResultFile(fila, nCelular, "El número de celular es obligatorio"));
+                } else if (!nCelular.matches("^\\d{10}$")) {
+                    listaErrores.add(new ResultFile(fila, nCelular, "El número de celular debe tener 10 dígitos"));
+                }
+
+                if (curp == null || curp.trim().isEmpty()) {
+                    listaErrores.add(new ResultFile(fila, curp, "El CURP es obligatorio"));
+                }
+
+                if (userName == null || userName.trim().isEmpty()) {
+                    listaErrores.add(new ResultFile(fila, userName, "El nombre de usuario es obligatorio"));
+                }
+
+                if (email == null || email.trim().isEmpty()) {
+                    listaErrores.add(new ResultFile(fila, email, "El correo electrónico es obligatorio"));
+                }
+
+                if (password == null || password.trim().isEmpty()) {
+                    listaErrores.add(new ResultFile(fila, password, "La contraseña es obligatoria"));
+                }
+
+                if (sexo != 'M' && sexo != 'F') {
+                    listaErrores.add(new ResultFile(fila, String.valueOf(sexo), "El sexo debe ser 'M' o 'F'"));
+                }
+
+                if (telefono != null && !telefono.trim().isEmpty() && !telefono.matches("^\\d{10}$")) {
+                    listaErrores.add(new ResultFile(fila, telefono, "El teléfono debe tener 10 dígitos si se proporciona"));
+                }
+
+                if (idRol <= 0) {
+                    listaErrores.add(new ResultFile(fila, String.valueOf(idRol), "El rol debe ser un ID válido"));
+                }
+
+                if (status != 0 && status != 1) {
+                    listaErrores.add(new ResultFile(fila, String.valueOf(status), "El status debe ser 0 (inactivo) o 1 (activo)"));
+                }
+
                 fila++;
             }
         }
         return listaErrores;
+    }
+
+    // Procesar archivo
+    @GetMapping("/CargaMasiva/Procesar")
+    public ResponseEntity<Result> ProcesarArchivo(@RequestBody String absolutePath) {
+        Result result = new Result();
+
+        try {
+            String tipoArchivo = absolutePath.split("\\.")[1];
+            List<UsuarioDireccion> listaUsuarios = new ArrayList();
+
+            if (tipoArchivo.equals("txt")) {
+                // Metodo para leer una lista
+                listaUsuarios = LecturaArchivoTXT(new File(absolutePath));
+            } else {
+                listaUsuarios = LecturaArchivoExcel(new File(absolutePath));
+            }
+            for (UsuarioDireccion usuarioDireccion : listaUsuarios) {
+                System.out.println("Estoy agregando un nuevo usuario y direccion");
+                usuarioDAOImplementation.AddJPA(usuarioDireccion);
+            }
+
+        } catch (Exception ex) {
+            result.correct = false;
+        }
+
+        return ResponseEntity.ok(result);
     }
 }

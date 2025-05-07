@@ -110,6 +110,33 @@ public class UsuarioDAOImplementation implements IUsuarioDAO {
         return result;
     }
 
+    @Override
+    public Result GetUsuarioById(int idUsuario) {
+        Result result = new Result();
+
+        try {
+            // Buscar al usuario por ID
+            Usuario usuario = entityManager
+                    .createQuery("FROM Usuario WHERE IdUsuario = :idUsuario", Usuario.class)
+                    .setParameter("idUsuario", idUsuario)
+                    .getSingleResult();
+            
+            if (usuario != null) {
+                UsuarioDireccion usuarioDireccion = new UsuarioDireccion();
+                usuarioDireccion.Usuario = usuario;
+                result.object = usuarioDireccion;
+                result.correct = true;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            result.correct = false;
+            result.errorMessage = ex.getMessage();
+            result.ex = ex;
+        }
+
+        return result;
+    }
+
     @Transactional
     @Override
     public Result AddJPA(UsuarioDireccion usuarioDireccion) {
