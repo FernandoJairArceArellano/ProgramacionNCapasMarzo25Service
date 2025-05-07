@@ -22,7 +22,6 @@ public class Estado {
     
     @JoinColumn(name = "idpais")
     @ManyToOne
-    @JsonIgnore
     public Pais Pais;
 
     public int getIdEstado() {

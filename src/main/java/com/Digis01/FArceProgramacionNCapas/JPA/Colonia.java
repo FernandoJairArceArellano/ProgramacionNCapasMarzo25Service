@@ -25,7 +25,6 @@ public class Colonia {
     
     @JoinColumn(name = "idmunicipio")
     @ManyToOne
-    @JsonIgnore
     public Municipio Municipio;
 
     public Municipio getMunicipio() {

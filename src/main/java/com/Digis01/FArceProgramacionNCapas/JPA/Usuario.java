@@ -71,9 +71,10 @@ public class Usuario {
 
     /*  Relación uno-a-muchos: un usuario puede tener muchas direcciones.
         mappedBy indica que la relación está mapeada por la propiedad 'Usuario' en Direccion.
-        fetch LAZY evita cargar las direcciones automáticamente hasta que se necesiten.*/
-    @OneToMany(mappedBy = "Usuario", fetch = FetchType.LAZY)
-    private List<Direccion> Direcciones;
+        fetch LAZY evita cargar las direcciones automáticamente hasta que se necesiten.
+    //@OneToMany(mappedBy = "Usuario", fetch = FetchType.LAZY)
+    @OneToMany
+    private List<Direccion> Direcciones;*/
 
     public int getIdUsuario() {
         return IdUsuario;
@@ -195,12 +196,12 @@ public class Usuario {
         this.Imagen = Imagen;
     }
 
-    public List<Direccion> getDirecciones() {
+    /*public List<Direccion> getDirecciones() {
         return Direcciones;
     }
 
     public void setDirecciones(List<Direccion> Direcciones) {
         this.Direcciones = Direcciones;
-    }
+    }*/
 
 }

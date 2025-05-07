@@ -42,20 +42,19 @@ public class UsuarioDAOImplementation implements IUsuarioDAO {
             List<Usuario> usuarios = entityManager
                     .createQuery("FROM Usuario ORDER BY IdUsuario", Usuario.class)
                     .getResultList();
-            
+
             List<UsuarioDireccion> listaUsuarioDireccion = new ArrayList<>();
 
             for (Usuario usuario : usuarios) {
                 UsuarioDireccion ud = new UsuarioDireccion();
                 ud.Usuario = usuario;
-                ud.Direcciones = usuario.getDirecciones();
-                
-                /*List<Direccion> direcciones = entityManager
+                //ud.Direcciones = usuario.getDirecciones();
+
+                List<Direccion> direcciones = entityManager
                         .createQuery("FROM Direccion WHERE Usuario.IdUsuario = :id", Direccion.class)
                         .setParameter("id", usuario.getIdUsuario())
                         .getResultList();
-                ud.Direcciones = direcciones;*/
-
+                ud.Direcciones = direcciones;
                 listaUsuarioDireccion.add(ud);
             }
 
@@ -77,46 +76,29 @@ public class UsuarioDAOImplementation implements IUsuarioDAO {
         Result result = new Result();
 
         try {
-            Usuario usuario = entityManager.find(Usuario.class, idUsuario);
-            if (usuario != null) {
-                UsuarioDireccion ud = new UsuarioDireccion();
-                ud.Usuario = usuario;
-                result.object = ud;
-                result.correct = true;
-            } else {
-                result.correct = false;
-                result.errorMessage = "Usuario no encontrado";
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            result.correct = false;
-            result.errorMessage = ex.getMessage();
-            result.ex = ex;
-        }
+            // Buscar al usuario por ID
+            Usuario usuario = entityManager
+                    .createQuery("FROM Usuario WHERE IdUsuario = :idUsuario", Usuario.class)
+                    .setParameter("idUsuario", idUsuario)
+                    .getSingleResult();
 
-        return result;
-    }
-
-    @Override
-    public Result DireccionesByIdUsuarioJPA(int idUsuario) {
-        Result result = new Result();
-
-        try {
-            Usuario usuario = entityManager.find(Usuario.class, idUsuario);
             if (usuario != null) {
                 UsuarioDireccion ud = new UsuarioDireccion();
                 ud.Usuario = usuario;
 
-                ud.Direcciones = entityManager.createQuery(
-                        "FROM Direccion WHERE Usuario.IdUsuario = :id", Direccion.class)
+                // Buscar direcciones del usuario
+                List<Direccion> direcciones = entityManager
+                        .createQuery("FROM Direccion WHERE Usuario.IdUsuario = :id", Direccion.class)
                         .setParameter("id", idUsuario)
                         .getResultList();
 
+                ud.Direcciones = direcciones;
+
                 result.object = ud;
                 result.correct = true;
             } else {
                 result.correct = false;
-                result.errorMessage = "Usuario no encontrado";
+                result.errorMessage = "Usuario no encontrado.";
             }
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -145,7 +127,7 @@ public class UsuarioDAOImplementation implements IUsuarioDAO {
         } catch (Exception ex) {
             ex.printStackTrace();
             result.correct = false;
-            result.errorMessage = "Error al guardar el usuario y dirección.";
+            result.errorMessage = ex.getLocalizedMessage();
             result.ex = ex;
         }
 
@@ -210,12 +192,11 @@ public class UsuarioDAOImplementation implements IUsuarioDAO {
 
             if (usuarioJPA != null) {
                 // Eliminar direcciones del usuario
-                List<Direccion> direcciones
-                        = entityManager.createQuery("FROM Direccion WHERE Usuario.IdUsuario = :idUsuario", Direccion.class)
-                                .setParameter("idUsuario", idUsuario)
-                                .getResultList();
+                List<Direccion> queryDirecciones = entityManager.createQuery("FROM Direccion WHERE Usuario.IdUsuario = :idUsuario", Direccion.class)
+                        .setParameter("idUsuario", idUsuario)
+                        .getResultList();
 
-                for (Direccion direccion : direcciones) {
+                for (Direccion direccion : queryDirecciones) {
                     entityManager.remove(direccion);
                 }
 
@@ -230,7 +211,7 @@ public class UsuarioDAOImplementation implements IUsuarioDAO {
         } catch (Exception ex) {
             ex.printStackTrace();
             result.correct = false;
-            result.errorMessage = "Error al eliminar el usuario.";
+            result.errorMessage = ex.getLocalizedMessage();
             result.ex = ex;
         }
 
@@ -388,4 +369,5 @@ public class UsuarioDAOImplementation implements IUsuarioDAO {
 
         return result;
     }
+
 }

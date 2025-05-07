@@ -23,23 +23,11 @@ public class EstadoDAOImplementation implements IEstadoDAO {
     public Result EstadoByIdPaisJPA(int IdPais) {
         Result result = new Result();
         try {
-            // Consulta JPQL: se asume que la entidad JPA Estado tiene un campo pais.idPais
-            TypedQuery<com.Digis01.FArceProgramacionNCapas.JPA.Estado> query
-                    = entityManager.createQuery(
-                            "FROM Estado e WHERE e.Pais.IdPais = :idPais ORDER BY e.IdEstado",
-                            com.Digis01.FArceProgramacionNCapas.JPA.Estado.class
-                    );
-            query.setParameter("idPais", IdPais);
-
-            List<com.Digis01.FArceProgramacionNCapas.JPA.Estado> estadosJPA = query.getResultList();
-            result.objects = new ArrayList<>();
-
-            for (com.Digis01.FArceProgramacionNCapas.JPA.Estado estadoJPA : estadosJPA) {
-                Estado estado = new Estado();
-                estado.setIdEstado(estadoJPA.getIdEstado());
-                estado.setNombre(estadoJPA.getNombre());
-                result.objects.add(estado);
-            }
+            // Consulta JPQL
+            TypedQuery<Estado> queryEstado = entityManager.createQuery(
+                    "FROM Estado WHERE Pais.IdPais = :idPais ORDER BY IdEstado",Estado.class);
+            queryEstado.setParameter("idPais", IdPais);
+            result.object = queryEstado.getResultList();
 
             result.correct = true;
         } catch (Exception ex) {
