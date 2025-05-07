@@ -49,36 +49,37 @@ public class DireccionDAOImplementation implements IDireccionDAO {
 
         try {
             // Buscar entidad Usuario existente
-            Usuario usuarioJPA
-                    = entityManager.find(Usuario.class, usuarioDireccion.Usuario.getIdUsuario());
-
+            Usuario usuarioJPA = entityManager.find(Usuario.class, usuarioDireccion.Usuario.getIdUsuario());
             if (usuarioJPA == null) {
-                result.errorMessage = ("Usuario no encontrado con ID: " + usuarioDireccion.Usuario.getIdUsuario());
+                result.correct = false;
+                result.errorMessage = "Usuario no encontrado con ID: " + usuarioDireccion.Usuario.getIdUsuario();
+                return result;
             }
 
-            // Buscar entidad Colonia
+            // Buscar entidad Colonia existente
             Colonia coloniaJPA = entityManager.find(Colonia.class, usuarioDireccion.Direccion.Colonia.getIdColonia());
-
             if (coloniaJPA == null) {
-                result.errorMessage = ("Colonia no encontrada con ID: " + usuarioDireccion.Direccion.Colonia.getIdColonia());
+                result.correct = false;
+                result.errorMessage = "Colonia no encontrada con ID: " + usuarioDireccion.Direccion.Colonia.getIdColonia();
+                return result;
             }
 
-            // Crear entidad Dirección
+            // Crear y asociar Dirección
             Direccion direccionJPA = new Direccion();
-
             direccionJPA.setCalle(usuarioDireccion.Direccion.getCalle());
             direccionJPA.setNumeroInterior(usuarioDireccion.Direccion.getNumeroInterior());
             direccionJPA.setNumeroExterior(usuarioDireccion.Direccion.getNumeroExterior());
             direccionJPA.setColonia(coloniaJPA);
-            //direccionJPA.setUsuario(usuarioJPA); // ASOCIA EL USUARIO!
+            
+            direccionJPA.setUsuario(usuarioJPA); // Asocia usuario
 
-            // Persistir la dirección
+            // Guardar en base de datos
             entityManager.persist(direccionJPA);
 
             result.correct = true;
         } catch (Exception ex) {
             result.correct = false;
-            result.errorMessage = ex.getLocalizedMessage();
+            result.errorMessage = "Error al guardar la dirección: " + ex.getMessage();
             result.ex = ex;
         }
 

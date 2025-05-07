@@ -75,4 +75,14 @@ public class Direccion {
     public void setColonia(Colonia Colonia) {
         this.Colonia = Colonia;
     }
+
+    public Usuario getUsuario() {
+        return Usuario;
+    }
+
+    public void setUsuario(Usuario Usuario) {
+        this.Usuario = Usuario;
+    }
+    
+    
 }

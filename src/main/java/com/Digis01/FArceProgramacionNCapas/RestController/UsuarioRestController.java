@@ -22,6 +22,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -73,17 +74,28 @@ public class UsuarioRestController {
         }
     }
 
+    @PutMapping("updateStatus")
+    public ResponseEntity<Result> updateStatus(@RequestBody Usuario usuario) {
+        Result result = usuarioDAOImplementation.UpdateStatusJPA(usuario);
+
+        if (result.correct) {
+            return ResponseEntity.ok(result);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(result);
+        }
+    }
+
     @GetMapping("direccionById/{IdDireccion}")
-    public ResponseEntity direccionById(@PathVariable int IdDireccion){
+    public ResponseEntity direccionById(@PathVariable int IdDireccion) {
         Result result = direccionDAOImplementation.GetByIdJPA(IdDireccion);
-        
+
         if (result.correct) {
             return ResponseEntity.ok(result);
         } else {
             return ResponseEntity.status(404).body(result);
         }
     }
-    
+
     @DeleteMapping("deletedireccion/{IdDireccion}")
     public ResponseEntity deleteDireccionById(@PathVariable int IdDireccion) {
         Result result = direccionDAOImplementation.DeleteDireccionJPA(IdDireccion);
@@ -97,7 +109,7 @@ public class UsuarioRestController {
 
     @PostMapping("add")
     public ResponseEntity addUsuarioDireccion(@RequestBody UsuarioDireccion usuarioDireccion) {
-        Result result = usuarioDAOImplementation.AddJPA(usuarioDireccion);
+        Result result = direccionDAOImplementation.DireccionAddJPA(usuarioDireccion);
 
         if (result.correct) {
             return ResponseEntity.ok(result);
