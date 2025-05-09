@@ -77,7 +77,7 @@ public class UsuarioRestController {
             return ResponseEntity.status(404).body(null);
         }
     }
-    
+
     @GetMapping("getUsuarioById/{id}")
     public ResponseEntity getUsuarioById(@PathVariable("id") int idUsuario) {
         //Result result = usuarioDAOImplementation.GetByIdJPA(idUsuario);
@@ -86,6 +86,17 @@ public class UsuarioRestController {
             return ResponseEntity.ok(result);
         } else {
             return ResponseEntity.status(404).body(null);
+        }
+    }
+
+    @PostMapping("getAllDinamico")
+    public ResponseEntity<Result> buscarUsuarios(@RequestBody Usuario usuario) {
+        Result result = usuarioDAOImplementation.GetAllDinamicoJPA(usuario);
+
+        if (result.correct) {
+            return ResponseEntity.ok(result);
+        } else {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
         }
     }
 
@@ -112,16 +123,16 @@ public class UsuarioRestController {
     }
 
     @PutMapping("direccionUpdate/{IdDireccion}")
-    public ResponseEntity<Result> updateDireccion(@RequestBody UsuarioDireccion usuarioDireccion){
+    public ResponseEntity<Result> updateDireccion(@RequestBody UsuarioDireccion usuarioDireccion) {
         Result result = direccionDAOImplementation.UpdateByIdJPA(usuarioDireccion);
-        
-        if (result.correct){
+
+        if (result.correct) {
             return ResponseEntity.ok(result);
-        } else{
+        } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(result);
         }
     }
-    
+
     @DeleteMapping("deletedireccion/{IdDireccion}")
     public ResponseEntity deleteDireccionById(@PathVariable int IdDireccion) {
         Result result = direccionDAOImplementation.DeleteDireccionJPA(IdDireccion);
@@ -134,6 +145,17 @@ public class UsuarioRestController {
     }
 
     @PostMapping("add")
+    public ResponseEntity addDireccion(@RequestBody UsuarioDireccion usuarioDireccion) {
+        Result result = usuarioDAOImplementation.AddJPA(usuarioDireccion);
+
+        if (result.correct) {
+            return ResponseEntity.ok(result);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result.errorMessage);
+        }
+    }
+
+    @PostMapping("direccion/add")
     public ResponseEntity addUsuarioDireccion(@RequestBody UsuarioDireccion usuarioDireccion) {
         Result result = direccionDAOImplementation.DireccionAddJPA(usuarioDireccion);
 
@@ -141,17 +163,6 @@ public class UsuarioRestController {
             return ResponseEntity.ok(result);
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Error: " + result.errorMessage);
-        }
-    }
-
-    @PostMapping("direccion/add")
-    public ResponseEntity addDireccion(@RequestBody UsuarioDireccion usuarioDireccion) {
-        Result result = direccionDAOImplementation.DireccionAddJPA(usuarioDireccion);
-
-        if (result.correct) {
-            return ResponseEntity.ok().body("Direccion agregada correctamente");
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result.errorMessage);
         }
     }
 
@@ -179,7 +190,7 @@ public class UsuarioRestController {
         }
     }
 
-    @PostMapping("/cargaMasiva")
+    @PostMapping("cargaMasiva")
     public ResponseEntity CargaMasiva(@RequestParam("archivo") MultipartFile archivo) {
         Result result = new Result();
         if (!archivo.isEmpty() || archivo != null) {

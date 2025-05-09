@@ -25,8 +25,8 @@ public class DireccionDAOImplementation implements IDireccionDAO {
 
         try {
             Direccion direccion = entityManager
-                    .createQuery("FROM Direccion WHERE IdDireccion = :id", Direccion.class)
-                    .setParameter("id", IdDireccion)
+                    .createQuery("FROM Direccion WHERE IdDireccion = :IdDireccion", Direccion.class)
+                    .setParameter("IdDireccion", IdDireccion)
                     .getSingleResult();
 
             result.object = direccion;
@@ -132,10 +132,7 @@ public class DireccionDAOImplementation implements IDireccionDAO {
             direccionJPA.setNumeroInterior(usuarioDireccion.Direccion.getNumeroInterior());
             direccionJPA.setNumeroExterior(usuarioDireccion.Direccion.getNumeroExterior());
             direccionJPA.setColonia(coloniaJPA);
-            //direccionJPA.setUsuario(usuarioJPA);
-
-            // No necesitas hacer merge explícitamente, Hibernate se encarga en transacciones.
-            // entityManager.merge(direccionJPA);
+            direccionJPA.setUsuario(usuarioJPA);
             result.correct = true;
         } catch (Exception ex) {
             result.correct = false;
