@@ -22,6 +22,7 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.CallableStatementCallback;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -120,7 +121,7 @@ public class UsuarioDAOImplementation implements IUsuarioDAO {
                     .createQuery("FROM Usuario WHERE IdUsuario = :idUsuario", Usuario.class)
                     .setParameter("idUsuario", idUsuario)
                     .getSingleResult();
-            
+
             if (usuario != null) {
                 UsuarioDireccion usuarioDireccion = new UsuarioDireccion();
                 usuarioDireccion.Usuario = usuario;
@@ -320,7 +321,7 @@ public class UsuarioDAOImplementation implements IUsuarioDAO {
             result.objects = new ArrayList<>();
 
             // Procesar datos de cada usuario
-            for (Usuario usuarioJPA : usuariosJPA) {
+            /*for (Usuario usuarioJPA : usuariosJPA) {
                 UsuarioDireccion usuarioDireccion = new UsuarioDireccion();
                 Usuario user = new Usuario();
 
@@ -383,7 +384,70 @@ public class UsuarioDAOImplementation implements IUsuarioDAO {
                 }
 
                 result.objects.add(usuarioDireccion);
-            }
+            }*/
+            List<UsuarioDireccion> usuariosDireccion = usuariosJPA.stream().map(usuarioJPA -> {
+                UsuarioDireccion usuarioDireccion = new UsuarioDireccion();
+                Usuario user = new Usuario();
+
+                user.setIdUsuario(usuarioJPA.getIdUsuario());
+                user.setNombre(usuarioJPA.getNombre());
+                user.setApellidoPaterno(usuarioJPA.getApellidoPaterno());
+                user.setApellidoMaterno(usuarioJPA.getApellidoMaterno());
+                user.setImagen(usuarioJPA.getImagen());
+                user.setUsername(usuarioJPA.getUsername());
+                user.setEmail(usuarioJPA.getEmail());
+                user.setPassword(usuarioJPA.getPassword());
+                user.setFNacimiento(usuarioJPA.getFNacimiento());
+                user.setSexo(usuarioJPA.getSexo());
+                user.setTelefono(usuarioJPA.getTelefono());
+                user.setNCelular(usuarioJPA.getNCelular());
+                user.setCURP(usuarioJPA.getCURP());
+                user.setStatus(usuarioJPA.getStatus());
+
+                if (usuarioJPA.getRol() != null) {
+                    Rol rol = new Rol();
+                    rol.setIdRol(usuarioJPA.getRol().getIdRol());
+                    rol.setNombre(usuarioJPA.getRol().getNombre());
+                    user.setRol(rol);
+                }
+
+                usuarioDireccion.Usuario = user;
+
+                // Direcciones (cargar individualmente por usuario)
+                TypedQuery<Direccion> queryDireccion
+                        = entityManager.createQuery("FROM Direccion WHERE Usuario.IdUsuario = :IdUsuario", Direccion.class);
+                queryDireccion.setParameter("IdUsuario", user.getIdUsuario());
+
+                List<Direccion> direccionesJPA = queryDireccion.getResultList();
+
+                usuarioDireccion.Direcciones = direccionesJPA.stream().map(direccionJPA -> {
+                    Direccion direccion = new Direccion();
+                    direccion.setIdDireccion(direccionJPA.getIdDireccion());
+                    direccion.setCalle(direccionJPA.getCalle() != null ? direccionJPA.getCalle() : "Sin dirección registrada");
+                    direccion.setNumeroExterior(direccionJPA.getNumeroExterior() != null ? direccionJPA.getNumeroExterior() : "");
+                    direccion.setNumeroInterior(direccionJPA.getNumeroInterior() != null ? direccionJPA.getNumeroInterior() : "");
+
+                    direccion.Colonia = new Colonia();
+                    direccion.Colonia.setIdColonia(direccionJPA.getColonia().getIdColonia());
+                    direccion.Colonia.setNombre(direccionJPA.getColonia().getNombre());
+                    direccion.Colonia.setCodigoPostal(direccionJPA.getColonia().getCodigoPostal());
+
+                    direccion.Colonia.Municipio = new Municipio();
+                    direccion.Colonia.Municipio.setNombre(direccionJPA.getColonia().getMunicipio().getNombre());
+
+                    direccion.Colonia.Municipio.Estado = new Estado();
+                    direccion.Colonia.Municipio.Estado.setNombre(direccionJPA.getColonia().getMunicipio().getEstado().getNombre());
+
+                    direccion.Colonia.Municipio.Estado.Pais = new Pais();
+                    direccion.Colonia.Municipio.Estado.Pais.setNombre(direccionJPA.getColonia().getMunicipio().getEstado().getPais().getNombre());
+
+                    return direccion;
+                }).collect(Collectors.toList());
+
+                return usuarioDireccion;
+            }).collect(Collectors.toList());
+
+            result.objects = new ArrayList<>(usuariosDireccion);
 
             result.correct = true;
 

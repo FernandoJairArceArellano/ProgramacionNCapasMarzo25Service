@@ -213,8 +213,10 @@ public class UsuarioRestController {
                 }
 
                 //Validar el archivo
-                List<ResultFile> listaErrores = new ArrayList<>();
+                //List<ResultFile> listaErrores = new ArrayList<>();
+                List<ResultFile> listaErrores = ValidarArchivo(listaUsuarios);
 
+                
                 if (listaErrores.isEmpty()) {
                     //Proceso mi archivo
                     result.correct = true;
@@ -235,9 +237,12 @@ public class UsuarioRestController {
                 return ResponseEntity.status(500).body("Todo mal");
             }
 
+        } else {
+            result.correct = false;
+            return ResponseEntity.status(400).body(result);
+
         }
 
-        return null;
     }
 
     public List<UsuarioDireccion> LecturaArchivoTXT(File archivo) {
@@ -329,6 +334,7 @@ public class UsuarioRestController {
 
                     usuarioDireccion.Usuario.Rol = new Rol();
                     usuarioDireccion.Usuario.Rol.setIdRol(Integer.parseInt(row.getCell(6).toString()));
+                    //usuarioDireccion.Usuario.Rol.setIdRol(Integer.parseInt(row.getCell(6).getStringCellValue()));
                     usuarioDireccion.Usuario.setCURP(row.getCell(7).toString());
                     usuarioDireccion.Usuario.setUsername(row.getCell(8).toString());
                     usuarioDireccion.Usuario.setEmail(row.getCell(9).toString());
@@ -451,6 +457,7 @@ public class UsuarioRestController {
             } else {
                 listaUsuarios = LecturaArchivoExcel(new File(absolutePath));
             }
+
             for (UsuarioDireccion usuarioDireccion : listaUsuarios) {
                 System.out.println("Estoy agregando un nuevo usuario y direccion");
                 usuarioDAOImplementation.AddJPA(usuarioDireccion);
