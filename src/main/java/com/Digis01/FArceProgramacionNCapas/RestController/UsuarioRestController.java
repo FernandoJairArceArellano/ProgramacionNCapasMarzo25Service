@@ -90,13 +90,13 @@ public class UsuarioRestController {
     }
 
     @PostMapping("getAllDinamico")
-    public ResponseEntity<Result> buscarUsuarios(@RequestBody Usuario usuario) {
+    public ResponseEntity buscarUsuarios(@RequestBody Usuario usuario) {
         Result result = usuarioDAOImplementation.GetAllDinamicoJPA(usuario);
 
         if (result.correct) {
             return ResponseEntity.ok(result);
         } else {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+            return ResponseEntity.status(404).body(null);
         }
     }
 
@@ -205,6 +205,7 @@ public class UsuarioRestController {
                 archivo.transferTo(new File(absolutePath));
                 //Leer el archivo
                 List<UsuarioDireccion> listaUsuarios = new ArrayList();
+
                 if (tipoArchivo.equals("txt")) {
                     listaUsuarios = LecturaArchivoTXT(new File(absolutePath)); //método para leer la lista
                 } else {
@@ -212,7 +213,7 @@ public class UsuarioRestController {
                 }
 
                 //Validar el archivo
-                List<ResultFile> listaErrores = ValidarArchivo(listaUsuarios);
+                List<ResultFile> listaErrores = new ArrayList<>();
 
                 if (listaErrores.isEmpty()) {
                     //Proceso mi archivo
@@ -326,8 +327,8 @@ public class UsuarioRestController {
 
                     usuarioDireccion.Usuario.setNCelular(row.getCell(5).toString());
 
-                    /*usuarioDireccion.Usuario.Rol = new Rol();
-                    usuarioDireccion.Usuario.Rol.setIdRol(Integer.parseInt(row.getCell(6).toString()));*/
+                    usuarioDireccion.Usuario.Rol = new Rol();
+                    usuarioDireccion.Usuario.Rol.setIdRol(Integer.parseInt(row.getCell(6).toString()));
                     usuarioDireccion.Usuario.setCURP(row.getCell(7).toString());
                     usuarioDireccion.Usuario.setUsername(row.getCell(8).toString());
                     usuarioDireccion.Usuario.setEmail(row.getCell(9).toString());
@@ -436,7 +437,7 @@ public class UsuarioRestController {
     }
 
     // Procesar archivo
-    @GetMapping("/CargaMasiva/Procesar")
+    @PostMapping("/CargaMasiva/Procesar")
     public ResponseEntity<Result> ProcesarArchivo(@RequestBody String absolutePath) {
         Result result = new Result();
 
@@ -454,6 +455,7 @@ public class UsuarioRestController {
                 System.out.println("Estoy agregando un nuevo usuario y direccion");
                 usuarioDAOImplementation.AddJPA(usuarioDireccion);
             }
+            result.correct = true;
 
         } catch (Exception ex) {
             result.correct = false;

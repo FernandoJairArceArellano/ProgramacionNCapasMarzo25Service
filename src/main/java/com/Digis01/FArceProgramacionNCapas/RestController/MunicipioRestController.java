@@ -16,8 +16,8 @@ public class MunicipioRestController {
     @Autowired
     private MunicipioDAOImplementation municipioDAOImplementation;
 
-    @GetMapping("byidestado/{id}")
-    public ResponseEntity getMunicipioByEstado(@PathVariable("id") int IdEstado) {
+    @GetMapping("byidestado/{IdEstado}")
+    public ResponseEntity getMunicipioByEstado(@PathVariable("IdEstado") int IdEstado) {
         Result result = municipioDAOImplementation.MunicipioByIdEstadoJPA(IdEstado);
         if (result.correct) {
             if (result.object == null) {

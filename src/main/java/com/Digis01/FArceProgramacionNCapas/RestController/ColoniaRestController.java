@@ -16,9 +16,9 @@ public class ColoniaRestController {
     @Autowired
     private ColoniaDAOImplementation coloniaDAOImplementation;
     
-    @GetMapping("byidmunicipio/{id}")
-    public ResponseEntity getMunicipioByIdEstado(@PathVariable("id") int IdEstado) {
-        Result result = coloniaDAOImplementation.ColoniaByIdMunicipioJPA(IdEstado);
+    @GetMapping("byidmunicipio/{IdMunicipio}")
+    public ResponseEntity getMunicipioByIdEstado(@PathVariable("IdMunicipio") int IdMunicipio) {
+        Result result = coloniaDAOImplementation.ColoniaByIdMunicipioJPA(IdMunicipio);
         if (result.correct) {
             if (result.object == null) {
                 return ResponseEntity.status(204).body(null);

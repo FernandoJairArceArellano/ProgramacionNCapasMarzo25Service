@@ -390,7 +390,7 @@ public class UsuarioDAOImplementation implements IUsuarioDAO {
         } catch (Exception ex) {
             ex.printStackTrace();
             result.correct = false;
-            result.errorMessage = "Error al obtener usuarios dinámicos con JPA.";
+            result.errorMessage = ex.getLocalizedMessage();
             result.ex = ex;
         }
 

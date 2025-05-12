@@ -16,8 +16,8 @@ public class EstadoRestController {
     @Autowired
     private EstadoDAOImplementation estadoDAOImplementation;
 
-    @GetMapping("byidpais/{id}")
-    public ResponseEntity getEstadoByIdPais(@PathVariable("id") int IdPais) {
+    @GetMapping("byidpais/{IdPais}")
+    public ResponseEntity getEstadoByIdPais(@PathVariable("IdPais") int IdPais) {
         Result result = estadoDAOImplementation.EstadoByIdPaisJPA(IdPais);
         if (result.correct) {
             if (result.object == null) {
