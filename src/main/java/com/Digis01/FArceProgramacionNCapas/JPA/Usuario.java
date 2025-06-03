@@ -1,6 +1,7 @@
 package com.Digis01.FArceProgramacionNCapas.JPA;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -16,52 +17,67 @@ import java.util.List;
 import org.springframework.format.annotation.DateTimeFormat;
 
 @Entity
+@Schema(description = "Entidad que representa a un usuario del sistema")
 public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idusuario")
+    @Schema(description = "Identificador único del usuario", example = "1")
     private int IdUsuario;
 
     @Column(name = "nombre")
+    @Schema(description = "Nombre del usuario", example = "Fernando Jair")
     private String Nombre;
 
     @Column(name = "apellidopaterno")
+    @Schema(description = "Apellido Paterno del usuario", example = "Arce")
     private String ApellidoPaterno;
 
     @Column(name = "apellidomaterno")
+    @Schema(description = "Apellido Materno del usuario", example = "Arellano")
     private String ApellidoMaterno;
 
     @Column(name = "username")
+    @Schema(description = "Username del usuario", example = "fernandoArce")
     private String Username;
 
     @Column(name = "email")
+    @Schema(description = "Correo electrónico del usuario", example = "fernandoArce@mail.com")
     private String Email;
 
     @Column(name = "password")
+    @Schema(description = "Contraseña del usuario", example = "hash contraseña")
     private String Password;
 
     @Column(name = "fnacimiento")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @Schema(description = "Fecha de nacimiento del usuario", example = "2000-01-01")
     private Date FNacimiento;
 
     @Column(name = "sexo")
+    @Schema(description = "Sexo del usuario, por ejemplo 'M' o 'F'", example = "M")
     private char Sexo;
 
     @Column(name = "telefono")
+    @Schema(description = "Teléfono del usuario", example = "5551234567")
     private String Telefono;
 
     @Column(name = "ncelular")
+    @Schema(description = "Número de celular del usuario", example = "5512345678")
     private String NCelular;
 
     @Column(name = "curp")
+    @Schema(description = "CURP del usuario", example = "AAAA001010HDFXXX01")
     private String CURP;
 
     @Column(name = "status")
+    @Schema(description = "Estatus del usuario en el sistema", example = "1 o 0")
     private int Status;
 
     @Lob
     @Column(name = "imagen")
+    @Schema(description = "Imagen de Usuario")
     private String Imagen;
 
     @JoinColumn(name = "idrol")
@@ -75,7 +91,6 @@ public class Usuario {
     //@OneToMany(mappedBy = "Usuario", fetch = FetchType.LAZY)
     @OneToMany
     private List<Direccion> Direcciones;*/
-
     public int getIdUsuario() {
         return IdUsuario;
     }
@@ -203,5 +218,4 @@ public class Usuario {
     public void setDirecciones(List<Direccion> Direcciones) {
         this.Direcciones = Direcciones;
     }*/
-
 }

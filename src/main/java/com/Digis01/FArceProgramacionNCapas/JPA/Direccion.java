@@ -1,6 +1,7 @@
 package com.Digis01.FArceProgramacionNCapas.JPA;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -10,20 +11,25 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
 @Entity
+@Schema(description = "Entidad que representa a una Direccion del sistema")
 public class Direccion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "iddireccion")
+    @Schema(description = "Identificador único de una  direccion", example = "3")
     private int IdDireccion;
 
     @Column(name = "calle")
+    @Schema(description = "Nombre de la calle", example = "Av Revolucion")
     private String Calle;
 
     @Column(name = "numerointerior")
+    @Schema(description = "Numero interior", example = "º 23")
     private String NumeroInterior;
 
     @Column(name = "numeroexterior")
+    @Schema(description = "Numero exterior", example = "º 2")
     private String NumeroExterior;
 
     @ManyToOne
@@ -83,6 +89,5 @@ public class Direccion {
     public void setUsuario(Usuario Usuario) {
         this.Usuario = Usuario;
     }
-    
-    
+
 }

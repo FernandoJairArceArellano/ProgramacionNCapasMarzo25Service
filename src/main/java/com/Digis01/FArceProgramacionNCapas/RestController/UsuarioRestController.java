@@ -9,6 +9,13 @@ import com.Digis01.FArceProgramacionNCapas.JPA.ResultFile;
 import com.Digis01.FArceProgramacionNCapas.JPA.Rol;
 import com.Digis01.FArceProgramacionNCapas.JPA.Usuario;
 import com.Digis01.FArceProgramacionNCapas.JPA.UsuarioDireccion;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpSession;
 import java.io.BufferedReader;
 import java.io.File;
@@ -40,6 +47,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/usuarioapi/v1")
+@Tag(name = "Usuario", description = "Operaciones para gestionar usuarios")
 public class UsuarioRestController {
 
     @Autowired
@@ -49,11 +57,40 @@ public class UsuarioRestController {
     private DireccionDAOImplementation direccionDAOImplementation;
 
     @GetMapping("saludo")
+    @Operation(
+            summary = "Saludo al Usuario",
+            description = "Permite verificar el estatus del servicio"
+    )
     public String Saludo() {
         return "Hola Mundo";
     }
 
     @GetMapping()
+    @Operation(
+            summary = "Obtiene todos los usuarios",
+            description = "Permite buscar todos los usuarios en la base de datos"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+                responseCode = "200",
+                description = "Usuarios encontrados correctamente"
+        ),
+        @ApiResponse(
+                responseCode = "204",
+                description = "No se encontraron usuarios",
+                content = @Content
+        ),
+        @ApiResponse(
+                responseCode = "404",
+                description = "Usuarios no encontrados",
+                content = @Content
+        ),
+        @ApiResponse(
+                responseCode = "500",
+                description = "Error interno del servidor",
+                content = @Content
+        )
+    })
     public ResponseEntity GetAll() {
         Result result = usuarioDAOImplementation.GetAllJPA();
         if (result.correct) {
@@ -68,7 +105,29 @@ public class UsuarioRestController {
     }
 
     @GetMapping("getById/{id}")
-    public ResponseEntity getById(@PathVariable("id") int idUsuario) {
+    @Operation(
+            summary = "Busqueda de usuario con sus direcciones por Id",
+            description = "Permite buscar a un usurio por su Id"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+                responseCode = "200",
+                description = "Usuario encontrado correctamente"
+        ),
+        @ApiResponse(
+                responseCode = "404",
+                description = "Usuario no encontrado",
+                content = @Content
+        ),
+        @ApiResponse(
+                responseCode = "500",
+                description = "Error interno del servidor",
+                content = @Content
+        )
+    })
+    public ResponseEntity getById(
+            @Parameter(description = "Id del Usuario que se desea buscar", example = "3")
+            @PathVariable("id") int idUsuario) {
         Result result = usuarioDAOImplementation.GetByIdJPA(idUsuario);
         //Result result = usuarioDAOImplementation.GetUsuarioById(idUsuario);
         if (result.correct) {
@@ -79,7 +138,30 @@ public class UsuarioRestController {
     }
 
     @GetMapping("getUsuarioById/{id}")
-    public ResponseEntity getUsuarioById(@PathVariable("id") int idUsuario) {
+    @Operation(
+            summary = "Busqueda de usuario por Id",
+            description = "Permite buscar a un usurio por su Id"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+                responseCode = "200",
+                description = "Usuario encontrado correctamente",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = Result.class))
+        ),
+        @ApiResponse(
+                responseCode = "404",
+                description = "Usuario no encontrado",
+                content = @Content
+        ),
+        @ApiResponse(
+                responseCode = "500",
+                description = "Error interno del servidor",
+                content = @Content
+        )
+    })
+    public ResponseEntity getUsuarioById(
+            @Parameter(description = "Id del usuario a buscar", example = "1")
+            @PathVariable("id") int idUsuario) {
         //Result result = usuarioDAOImplementation.GetByIdJPA(idUsuario);
         Result result = usuarioDAOImplementation.GetUsuarioById(idUsuario);
         if (result.correct) {
@@ -89,8 +171,36 @@ public class UsuarioRestController {
         }
     }
 
-    @PostMapping("getAllDinamico")
-    public ResponseEntity buscarUsuarios(@RequestBody Usuario usuario) {
+    @PostMapping("/getAllDinamico")
+    @Operation(
+            summary = "Buscar usuarios dinámicamente",
+            description = "Permite buscar usuarios con filtros dinámicos usando un objeto Usuario como ejemplo."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+                responseCode = "200",
+                description = "Usuario encontrado correctamente",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = Result.class))
+        ),
+        @ApiResponse(
+                responseCode = "404",
+                description = "Usuario no encontrado",
+                content = @Content
+        ),
+        @ApiResponse(
+                responseCode = "500",
+                description = "Error interno del servidor",
+                content = @Content
+        )
+    })
+    public ResponseEntity<Result> buscarUsuarios(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Criterios del usuario para búsqueda",
+                    required = true,
+                    content = @Content(schema = @Schema(implementation = Usuario.class))
+            )
+            @RequestBody Usuario usuario) {
+
         Result result = usuarioDAOImplementation.GetAllDinamicoJPA(usuario);
 
         if (result.correct) {
@@ -101,7 +211,35 @@ public class UsuarioRestController {
     }
 
     @PutMapping("updateStatus")
-    public ResponseEntity<Result> updateStatus(@RequestBody Usuario usuario) {
+    @Operation(
+            summary = "Actualizar el estado (Status) de un usuario",
+            description = "Permite actualizar el estado (activo/inactivo) de un usuario sin necesidad de eliminarlo de la base de datos"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+                responseCode = "200",
+                description = "Estado del Usuario encontrado correctamente",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = Result.class))
+        ),
+        @ApiResponse(
+                responseCode = "404",
+                description = "Usuario no encontrado",
+                content = @Content
+        ),
+        @ApiResponse(
+                responseCode = "500",
+                description = "Error interno del servidor",
+                content = @Content
+        )
+    })
+    public ResponseEntity<Result> updateStatus(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Objeto Usuario con el nuevo estado a actualizar",
+                    required = true,
+                    content = @Content(schema = @Schema(implementation = Usuario.class))
+            )
+            @RequestBody Usuario usuario) {
+
         Result result = usuarioDAOImplementation.UpdateStatusJPA(usuario);
 
         if (result.correct) {
@@ -112,7 +250,30 @@ public class UsuarioRestController {
     }
 
     @GetMapping("direccionById/{IdDireccion}")
-    public ResponseEntity direccionById(@PathVariable int IdDireccion) {
+    @Operation(
+            summary = "Busqueda de una Direccion por Id perteneciente a un Usuario",
+            description = "Permite buscar a la Direccion usurio por el Id de la Direccion"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+                responseCode = "200",
+                description = "Direccion encontrado correctamente",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = Result.class))
+        ),
+        @ApiResponse(
+                responseCode = "404",
+                description = "Direccion no encontrado",
+                content = @Content
+        ),
+        @ApiResponse(
+                responseCode = "500",
+                description = "Error interno del servidor",
+                content = @Content
+        )
+    })
+    public ResponseEntity direccionById(
+            @Parameter(description = "Id de la Direccion a buscar", example = "3")
+            @PathVariable int IdDireccion) {
         Result result = direccionDAOImplementation.GetByIdJPA(IdDireccion);
 
         if (result.correct) {
@@ -123,7 +284,34 @@ public class UsuarioRestController {
     }
 
     @PutMapping("direccionUpdate/{IdDireccion}")
-    public ResponseEntity<Result> updateDireccion(@RequestBody UsuarioDireccion usuarioDireccion) {
+    @Operation(
+            summary = "Actualizacion de una Direccion por su Id",
+            description = "Permite buscar a la Direccion usurio por el Id de la Direccion"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+                responseCode = "200",
+                description = "Direccion encontrado correctamente",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = Result.class))
+        ),
+        @ApiResponse(
+                responseCode = "404",
+                description = "Direccion no encontrado",
+                content = @Content
+        ),
+        @ApiResponse(
+                responseCode = "500",
+                description = "Error interno del servidor",
+                content = @Content
+        )
+    })
+    public ResponseEntity<Result> updateDireccion(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Objeto Direccion con valores a cambiar",
+                    required = true,
+                    content = @Content(schema = @Schema(implementation = Direccion.class))
+            )
+            @RequestBody UsuarioDireccion usuarioDireccion) {
         Result result = direccionDAOImplementation.UpdateByIdJPA(usuarioDireccion);
 
         if (result.correct) {
@@ -216,7 +404,6 @@ public class UsuarioRestController {
                 //List<ResultFile> listaErrores = new ArrayList<>();
                 List<ResultFile> listaErrores = ValidarArchivo(listaUsuarios);
 
-                
                 if (listaErrores.isEmpty()) {
                     //Proceso mi archivo
                     result.correct = true;

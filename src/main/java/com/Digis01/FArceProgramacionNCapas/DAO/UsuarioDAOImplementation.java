@@ -385,6 +385,7 @@ public class UsuarioDAOImplementation implements IUsuarioDAO {
 
                 result.objects.add(usuarioDireccion);
             }*/
+            
             List<UsuarioDireccion> usuariosDireccion = usuariosJPA.stream().map(usuarioJPA -> {
                 UsuarioDireccion usuarioDireccion = new UsuarioDireccion();
                 Usuario user = new Usuario();
