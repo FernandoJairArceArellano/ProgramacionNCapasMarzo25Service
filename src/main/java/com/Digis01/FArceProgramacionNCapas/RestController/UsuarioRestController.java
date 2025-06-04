@@ -252,7 +252,7 @@ public class UsuarioRestController {
     @GetMapping("direccionById/{IdDireccion}")
     @Operation(
             summary = "Busqueda de una Direccion por Id perteneciente a un Usuario",
-            description = "Permite buscar a la Direccion usurio por el Id de la Direccion"
+            description = "Permite buscar a la Direccion usuario por el Id de la Direccion"
     )
     @ApiResponses(value = {
         @ApiResponse(
@@ -309,7 +309,7 @@ public class UsuarioRestController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Objeto Direccion con valores a cambiar",
                     required = true,
-                    content = @Content(schema = @Schema(implementation = Direccion.class))
+                    content = @Content(schema = @Schema(implementation = UsuarioDireccion.class))
             )
             @RequestBody UsuarioDireccion usuarioDireccion) {
         Result result = direccionDAOImplementation.UpdateByIdJPA(usuarioDireccion);
@@ -322,7 +322,30 @@ public class UsuarioRestController {
     }
 
     @DeleteMapping("deletedireccion/{IdDireccion}")
-    public ResponseEntity deleteDireccionById(@PathVariable int IdDireccion) {
+    @Operation(
+            summary = "Borrar una Direccion de un usuario existente",
+            description = "Permite borrar los datos de una direccion de usuario existente en el sistema. El ID de la direccion debe estar presente en el cuerpo del objeto."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+                responseCode = "200",
+                description = "Usuario borrado correctamente",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))
+        ),
+        @ApiResponse(
+                responseCode = "400",
+                description = "Error en los datos enviados o en el proceso de actualización",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))
+        ),
+        @ApiResponse(
+                responseCode = "500",
+                description = "Error interno del servidor",
+                content = @Content
+        )
+    })
+    public ResponseEntity deleteDireccionById(
+            @Parameter(description = "Id de la Direccion a borrar", example = "3")
+            @PathVariable int IdDireccion) {
         Result result = direccionDAOImplementation.DeleteDireccionJPA(IdDireccion);
 
         if (result.correct) {
@@ -333,7 +356,32 @@ public class UsuarioRestController {
     }
 
     @PostMapping("add")
-    public ResponseEntity addDireccion(@RequestBody UsuarioDireccion usuarioDireccion) {
+    @Operation(
+            summary = "Agregar un nuevo usuario y su direccion",
+            description = "Permite agregar un Usuario y la Direccion"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+                responseCode = "200",
+                description = "Usuario agregado y su Direccion correctamente",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = Result.class))
+        ),
+        @ApiResponse(
+                responseCode = "404",
+                description = "Error al agregar un nuevo Usuario y su Direccion"
+        ),
+        @ApiResponse(
+                responseCode = "500",
+                description = "Error interno del servidor"
+        )
+    })
+    public ResponseEntity<?> addDireccion(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Objeto con información del usuario y dirección",
+                    required = true,
+                    content = @Content(schema = @Schema(implementation = UsuarioDireccion.class))
+            )
+            @RequestBody UsuarioDireccion usuarioDireccion) {
         Result result = usuarioDAOImplementation.AddJPA(usuarioDireccion);
 
         if (result.correct) {
@@ -344,7 +392,34 @@ public class UsuarioRestController {
     }
 
     @PostMapping("direccion/add")
-    public ResponseEntity addUsuarioDireccion(@RequestBody UsuarioDireccion usuarioDireccion) {
+    @Operation(
+            summary = "Agregar una dirección adicional a un usuario",
+            description = "Permite registrar una nueva dirección para un usuario existente. El objeto debe contener el usuario y la dirección a agregar."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+                responseCode = "200",
+                description = "Dirección agregada correctamente al usuario",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = Result.class))
+        ),
+        @ApiResponse(
+                responseCode = "404",
+                description = "Error al agregar la dirección al usuario",
+                content = @Content
+        ),
+        @ApiResponse(
+                responseCode = "500",
+                description = "Error interno del servidor",
+                content = @Content
+        )
+    })
+    public ResponseEntity addUsuarioDireccion(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Objeto con información del usuario y dirección",
+                    required = true,
+                    content = @Content(schema = @Schema(implementation = UsuarioDireccion.class))
+            )
+            @RequestBody UsuarioDireccion usuarioDireccion) {
         Result result = direccionDAOImplementation.DireccionAddJPA(usuarioDireccion);
 
         if (result.correct) {
@@ -355,7 +430,33 @@ public class UsuarioRestController {
     }
 
     @PutMapping("update")
-    public ResponseEntity updateUsuario(@RequestBody Usuario usuario) {
+    @Operation(
+            summary = "Actualizar un usuario existente",
+            description = "Permite actualizar los datos personales de un usuario existente en el sistema. El ID del usuario debe estar presente en el cuerpo del objeto."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+                responseCode = "200",
+                description = "Usuario actualizado correctamente",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))
+        ),
+        @ApiResponse(
+                responseCode = "400",
+                description = "Error en los datos enviados o en el proceso de actualización",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))
+        ),
+        @ApiResponse(
+                responseCode = "500",
+                description = "Error interno del servidor",
+                content = @Content
+        )
+    })
+    public ResponseEntity updateUsuario(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Objeto con información del usuario y dirección",
+                    required = true,
+                    content = @Content(schema = @Schema(implementation = Usuario.class))
+            ) @RequestBody Usuario usuario) {
         Result result = usuarioDAOImplementation.UpdateJPA(usuario);
 
         if (result.correct) {
@@ -366,7 +467,30 @@ public class UsuarioRestController {
     }
 
     @DeleteMapping("delete/{IdUsuario}")
-    public ResponseEntity deleteUsuario(@PathVariable int IdUsuario) {
+    @Operation(
+            summary = "Borrar un usuario existente",
+            description = "Permite borrar los datos personales de un usuario existente en el sistema. El ID del usuario debe estar presente en el cuerpo del objeto."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+                responseCode = "200",
+                description = "Usuario borrado correctamente",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))
+        ),
+        @ApiResponse(
+                responseCode = "400",
+                description = "Error en los datos enviados o en el proceso de actualización",
+                content = @Content(mediaType = "application/json", schema = @Schema(implementation = String.class))
+        ),
+        @ApiResponse(
+                responseCode = "500",
+                description = "Error interno del servidor",
+                content = @Content
+        )
+    })
+    public ResponseEntity deleteUsuario(
+            @Parameter(description = "Id de la Direccion a eliminar", example = "3")
+            @PathVariable int IdUsuario) {
 
         Result result = usuarioDAOImplementation.DeleteJPA(IdUsuario);
 
